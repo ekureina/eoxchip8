@@ -37,6 +37,19 @@ impl Ram {
 
         Ok(self.data[address.0 as usize])
     }
+
+    #[allow(clippy::cast_possible_truncation)]
+    pub fn load_program(&mut self, program: &[u8]) -> MemoryResult<()> {
+        if 0x200 + program.len() > self.data.len() {
+            return Err(MemoryAccessError::AddressOutOfBounds(Address(
+                0x200 + program.len() as u16,
+            )));
+        }
+        for (offset, byte) in program.iter().enumerate() {
+            self.data[0x200 + offset] = *byte;
+        }
+        Ok(())
+    }
 }
 
 impl Default for Ram {
@@ -90,5 +103,26 @@ mod tests {
             Err(MemoryAccessError::AddressOutOfBounds(Address(4096)))
         );
         assert_eq!(ram.get(Address(4095)), Ok(0));
+    }
+
+    #[test]
+    fn load_short_program() {
+        let mut ram = Ram::new();
+        let program = [0x10, 0x20, 0x30, 0x40];
+        ram.load_program(&program).unwrap();
+        assert_eq!(ram.data[0x200], 0x10);
+        assert_eq!(ram.data[0x201], 0x20);
+        assert_eq!(ram.data[0x202], 0x30);
+        assert_eq!(ram.data[0x203], 0x40);
+    }
+
+    #[test]
+    fn load_long_program() {
+        let mut ram = Ram::new();
+        let program = [0x20; (u16::MAX - 0x200) as usize];
+        assert_eq!(
+            ram.load_program(&program),
+            Err(MemoryAccessError::AddressOutOfBounds(Address(u16::MAX)))
+        );
     }
 }
