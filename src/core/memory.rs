@@ -3,7 +3,7 @@ use thiserror::Error;
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Ord, Eq)]
 pub struct Address(pub u16);
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Ord, Eq)]
 pub struct Ram {
     data: [u8; 4096],
 }
@@ -61,6 +61,40 @@ impl Default for Ram {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Ord, Eq)]
+pub struct Chip8Display {
+    data: [[bool; 32]; 64],
+}
+
+impl Chip8Display {
+    pub fn new() -> Self {
+        Chip8Display::default()
+    }
+
+    /// Clears the Chip8's display
+    pub fn clear(&mut self) {
+        self.data = [[false; 32]; 64];
+    }
+
+    /// Flips a pixel in the Chip8's display
+    pub fn flip_pixel(&mut self, x: u8, y: u8) {
+        self.data[x as usize][y as usize] ^= true;
+    }
+
+    /// Gets a reference to the Chip8's display memory
+    pub fn get(&self) -> &[[bool; 32]] {
+        &self.data
+    }
+}
+
+impl Default for Chip8Display {
+    fn default() -> Self {
+        Chip8Display {
+            data: [[false; 32]; 64],
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -109,7 +143,7 @@ mod tests {
     }
 
     #[test]
-    fn load_short_program() {
+    fn test_load_short_program() {
         let mut ram = Ram::new();
         let program = [0x10, 0x20, 0x30, 0x40];
         ram.load_program(&program).unwrap();
@@ -120,12 +154,47 @@ mod tests {
     }
 
     #[test]
-    fn load_long_program() {
+    fn test_load_long_program() {
         let mut ram = Ram::new();
         let program = [0x20; (u16::MAX - 0x200) as usize];
         assert_eq!(
             ram.load_program(&program),
             Err(MemoryAccessError::AddressOutOfBounds(Address(u16::MAX)))
         );
+    }
+
+    #[test]
+    fn test_flip_pixels_display() {
+        let mut display = Chip8Display::new();
+        display.flip_pixel(0, 0);
+        assert!(display.get()[0][0]);
+        display.flip_pixel(0, 0);
+        assert!(!display.get()[0][0]);
+    }
+
+    #[test]
+    fn test_clear_display() {
+        let mut display = Chip8Display::new();
+        display.flip_pixel(0, 0);
+        display.flip_pixel(0, 1);
+        assert!(display.get()[0][0]);
+        assert!(display.get()[0][1]);
+        display.clear();
+        assert!(!display.get()[0][0]);
+        assert!(!display.get()[0][1]);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_display_out_of_bounds_access_x() {
+        let mut display = Chip8Display::new();
+        display.flip_pixel(64, 0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_display_out_of_bounds_access_y() {
+        let mut display = Chip8Display::new();
+        display.flip_pixel(0, 32);
     }
 }
