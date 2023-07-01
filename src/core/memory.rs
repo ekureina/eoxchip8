@@ -12,6 +12,8 @@ pub struct Ram {
 pub enum MemoryAccessError {
     #[error("Address out of Bounds: {0:?}")]
     AddressOutOfBounds(Address),
+    #[error("Address unaligned for access: {0:?}")]
+    AddressUnaligned(Address),
 }
 
 type MemoryResult<T> = Result<T, MemoryAccessError>;
@@ -36,6 +38,17 @@ impl Ram {
         }
 
         Ok(self.data[address.0 as usize])
+    }
+
+    pub fn get_wide(&self, address: Address) -> MemoryResult<u16> {
+        if address.0 % 2 != 0 {
+            return Err(MemoryAccessError::AddressUnaligned(address));
+        }
+
+        let mut data = u16::from(self.get(address)?) << 8;
+        data |= u16::from(self.get(Address(address.0 + 1))?);
+
+        Ok(data)
     }
 
     #[allow(clippy::cast_possible_truncation)]
