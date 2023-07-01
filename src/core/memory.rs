@@ -31,10 +31,6 @@ impl Ram {
     }
 
     pub fn get(&self, address: Address) -> MemoryResult<u8> {
-        if address.0 < 0x200 {
-            return Err(MemoryAccessError::AddressOutOfBounds(address));
-        }
-
         if address.0 as usize >= self.data.len() {
             return Err(MemoryAccessError::AddressOutOfBounds(address));
         }
@@ -125,29 +121,11 @@ mod tests {
     }
 
     #[test]
-    fn test_get_memory_low_address() {
-        let ram = Ram::default();
-        assert_eq!(
-            ram.get(Address(0)),
-            Err(MemoryAccessError::AddressOutOfBounds(Address(0)))
-        );
-    }
-
-    #[test]
     fn test_get_memory_high_address() {
         let ram = Ram::new();
         assert_eq!(
             ram.get(Address(4097)),
             Err(MemoryAccessError::AddressOutOfBounds(Address(4097)))
-        );
-    }
-
-    #[test]
-    fn test_get_memory_interpreter_boundary() {
-        let ram = Ram::new();
-        assert_eq!(
-            ram.get(Address(0x1FF)),
-            Err(MemoryAccessError::AddressOutOfBounds(Address(0x1FF)))
         );
     }
 
