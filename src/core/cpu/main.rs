@@ -34,7 +34,9 @@ impl Executor {
     }
 
     pub fn execute_once(&mut self) -> Result<(), ExecutionError> {
-        match self.memory.get_wide(self.pc.get())?.try_into()? {
+        let pc = self.pc.get();
+        self.pc.inc();
+        match self.memory.get_wide(pc)?.try_into()? {
             Instruction::ClearScreen => self.display.clear(),
             Instruction::LoadVImm { reg_num, imm } => {
                 self.gp_registers[reg_num as usize].set(imm);
@@ -49,8 +51,11 @@ impl Executor {
             } => {
                 self.draw_on_display(x_reg_num, y_reg_num, sprite_length)?;
             }
+            Instruction::JumpTo { address } => {
+                self.pc.set(address);
+            }
+            Instruction::Sys { .. } => {}
         }
-        self.pc.inc();
         Ok(())
     }
 

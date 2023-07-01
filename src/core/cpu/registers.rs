@@ -99,6 +99,10 @@ impl RegisterPC {
     pub fn get(&self) -> Address {
         self.data
     }
+
+    pub fn set(&mut self, new_address: Address) {
+        self.data = new_address;
+    }
 }
 
 impl Default for RegisterPC {

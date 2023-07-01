@@ -1,5 +1,7 @@
 use thiserror::Error;
 
+use crate::core::memory::Address;
+
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq)]
 pub enum Instruction {
     ClearScreen,
@@ -14,6 +16,12 @@ pub enum Instruction {
         x_reg_num: u8,
         y_reg_num: u8,
         sprite_length: u8,
+    },
+    JumpTo {
+        address: Address,
+    },
+    Sys {
+        address: Address,
     },
 }
 
@@ -53,6 +61,14 @@ impl TryFrom<u16> for Instruction {
                     y_reg_num,
                     sprite_length,
                 })
+            }
+            0x0000 => {
+                let address = Address(value & 0x0FFF);
+                Ok(Instruction::Sys { address })
+            }
+            0x1000 => {
+                let address = Address(value & 0x0FFF);
+                Ok(Instruction::JumpTo { address })
             }
             _ => Err(InstructionDecodeError::UnknownInstruction(value)),
         }
