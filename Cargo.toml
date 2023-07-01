@@ -2,6 +2,12 @@
 name = "rc8"
 version = "0.1.0"
 edition = "2021"
+authors = ["Claire Moore <kurennon@gmail.com>"]
+rust-version = "1.70"
+description = "A Chip8 emulator, written in rust"
+license = "Apache-2.0"
+publish = false
+default-run = "chip8_run"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
