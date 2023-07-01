@@ -1,7 +1,7 @@
 use thiserror::Error;
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Ord, Eq)]
-pub struct Address(u16);
+pub struct Address(pub u16);
 
 #[derive(Debug, Clone, Copy)]
 pub struct Ram {
@@ -19,8 +19,11 @@ type MemoryResult<T> = Result<T, MemoryAccessError>;
 impl Ram {
     /// Create a new stick of Chip-8 RAM
     /// ```
+    /// # use rc8::core::memory::*;
     /// let ram = Ram::new();
-    /// # assert_eq!(ram.data, [0; 4096]);
+    /// # for addr in 0x200..4096 {
+    /// # assert_eq!(ram.get(Address(addr)), Ok(0));
+    /// }
     /// ```
     pub fn new() -> Self {
         Ram::default()

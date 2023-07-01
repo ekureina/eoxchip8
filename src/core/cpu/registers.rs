@@ -12,6 +12,7 @@ impl RegisterV {
 
     /// Gets the value in this register
     /// ```
+    /// # use rc8::core::cpu::registers::RegisterV;
     /// # let register = RegisterV::new();
     /// assert_eq!(register.get(), 0);
     /// ````
@@ -21,6 +22,7 @@ impl RegisterV {
 
     /// Sets the value in this register
     /// ```
+    /// # use rc8::core::cpu::registers::RegisterV;
     /// # let mut register = RegisterV::new();
     /// register.set(10);
     /// # assert_eq!(register.get(), 10);
