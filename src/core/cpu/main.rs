@@ -41,6 +41,7 @@ impl Executor {
                 self.i.set(imm);
             }
         }
+        self.pc.inc();
         Ok(())
     }
 
