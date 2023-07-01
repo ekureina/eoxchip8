@@ -1,6 +1,8 @@
 use thiserror::Error;
 
-use crate::core::memory::{Chip8Display, MemoryAccessError, Ram};
+use crate::core::memory::{
+    memory_to_flip_instructions, Address, Chip8Display, MemoryAccessError, Ram,
+};
 
 use super::{
     instructions::{Instruction, InstructionDecodeError},
@@ -40,13 +42,52 @@ impl Executor {
             Instruction::LoadIImm { imm } => {
                 self.i.set(imm);
             }
+            Instruction::Draw {
+                x_reg_num,
+                y_reg_num,
+                sprite_length,
+            } => {
+                self.draw_on_display(x_reg_num, y_reg_num, sprite_length)?;
+            }
         }
         self.pc.inc();
         Ok(())
     }
 
+    #[must_use]
     pub fn get_display(&self) -> &Chip8Display {
         &self.display
+    }
+
+    #[allow(clippy::cast_possible_truncation)]
+    fn draw_on_display(
+        &mut self,
+        x_reg_num: u8,
+        y_reg_num: u8,
+        sprite_length: u8,
+    ) -> Result<(), MemoryAccessError> {
+        let sprite_memory_start = self.i.get();
+        let mut sprite_direct_memory = vec![];
+        for offset in 0..sprite_length {
+            sprite_direct_memory.push(
+                self.memory
+                    .get(Address(sprite_memory_start + u16::from(offset)))?,
+            );
+        }
+
+        let sprite_flips = memory_to_flip_instructions(&sprite_direct_memory);
+
+        let start_x = self.gp_registers[x_reg_num as usize].get();
+        let start_y = self.gp_registers[y_reg_num as usize].get();
+        for offset_x in 0..(u8::BITS as u8) {
+            for offset_y in 0..sprite_length {
+                if sprite_flips[offset_y as usize][offset_x as usize] {
+                    self.display
+                        .flip_pixel(start_x + offset_x, start_y + offset_y);
+                }
+            }
+        }
+        Ok(())
     }
 }
 

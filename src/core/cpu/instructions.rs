@@ -3,8 +3,18 @@ use thiserror::Error;
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq)]
 pub enum Instruction {
     ClearScreen,
-    LoadVImm { reg_num: u8, imm: u8 },
-    LoadIImm { imm: u16 },
+    LoadVImm {
+        reg_num: u8,
+        imm: u8,
+    },
+    LoadIImm {
+        imm: u16,
+    },
+    Draw {
+        x_reg_num: u8,
+        y_reg_num: u8,
+        sprite_length: u8,
+    },
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq, Error)]
@@ -33,6 +43,16 @@ impl TryFrom<u16> for Instruction {
             0xA000 => {
                 let imm = value & 0xFFF;
                 Ok(Instruction::LoadIImm { imm })
+            }
+            0xD000 => {
+                let x_reg_num = ((value & 0x0F00) >> 8) as u8;
+                let y_reg_num = ((value & 0x00F0) >> 4) as u8;
+                let sprite_length = (value & 0x000F) as u8;
+                Ok(Instruction::Draw {
+                    x_reg_num,
+                    y_reg_num,
+                    sprite_length,
+                })
             }
             _ => Err(InstructionDecodeError::UnknownInstruction(value)),
         }

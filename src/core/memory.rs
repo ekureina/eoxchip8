@@ -123,6 +123,24 @@ impl std::fmt::Display for Chip8Display {
     }
 }
 
+#[must_use]
+pub fn memory_to_flip_instructions(memory: &[u8]) -> Vec<Vec<bool>> {
+    memory
+        .iter()
+        .map(|byte| byte_to_flip_instructions(*byte))
+        .collect()
+}
+
+fn byte_to_flip_instructions(byte: u8) -> Vec<bool> {
+    let mut mask = 0x80;
+    let mut result = vec![];
+    for _ in 0..u8::BITS {
+        result.push((byte & mask) != 0);
+        mask >>= 1;
+    }
+    result
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
