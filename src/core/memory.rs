@@ -95,6 +95,22 @@ impl Default for Chip8Display {
     }
 }
 
+impl std::fmt::Display for Chip8Display {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for column in &self.data {
+            for pixel in column {
+                if *pixel {
+                    write!(f, "█")?;
+                } else {
+                    write!(f, " ")?;
+                }
+            }
+            writeln!(f)?;
+        }
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
