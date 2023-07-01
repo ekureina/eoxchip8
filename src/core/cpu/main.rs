@@ -43,6 +43,10 @@ impl Executor {
         }
         Ok(())
     }
+
+    pub fn get_display(&self) -> &Chip8Display {
+        &self.display
+    }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq, Error)]
