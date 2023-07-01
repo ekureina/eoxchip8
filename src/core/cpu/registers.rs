@@ -8,6 +8,7 @@ pub struct RegisterV {
 }
 
 impl RegisterV {
+    #[must_use]
     pub fn new() -> Self {
         RegisterV::default()
     }
@@ -18,6 +19,7 @@ impl RegisterV {
     /// # let register = RegisterV::new();
     /// assert_eq!(register.get(), 0);
     /// ````
+    #[must_use]
     pub fn get(&self) -> u8 {
         self.data
     }
@@ -45,6 +47,7 @@ pub struct RegisterI {
 }
 
 impl RegisterI {
+    #[must_use]
     pub fn new() -> Self {
         RegisterI::default()
     }
@@ -55,6 +58,7 @@ impl RegisterI {
     /// # let register = RegisterI::new();
     /// assert_eq!(register.get(), 0);
     /// ````
+    #[must_use]
     pub fn get(&self) -> u16 {
         self.data
     }
@@ -82,6 +86,7 @@ pub struct RegisterPC {
 }
 
 impl RegisterPC {
+    #[must_use]
     pub fn new() -> Self {
         RegisterPC::default()
     }
@@ -90,6 +95,7 @@ impl RegisterPC {
         self.data.0 += 2;
     }
 
+    #[must_use]
     pub fn get(&self) -> Address {
         self.data
     }

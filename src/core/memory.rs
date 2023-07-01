@@ -25,6 +25,7 @@ impl Ram {
     /// # assert_eq!(ram.get(Address(addr)), Ok(0));
     /// }
     /// ```
+    #[must_use]
     pub fn new() -> Self {
         Ram::default()
     }
@@ -67,6 +68,7 @@ pub struct Chip8Display {
 }
 
 impl Chip8Display {
+    #[must_use]
     pub fn new() -> Self {
         Chip8Display::default()
     }
@@ -82,6 +84,7 @@ impl Chip8Display {
     }
 
     /// Gets a reference to the Chip8's display memory
+    #[must_use]
     pub fn get(&self) -> &[[bool; 32]] {
         &self.data
     }
