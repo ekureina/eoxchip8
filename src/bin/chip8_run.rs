@@ -19,6 +19,6 @@ fn main() {
     loop {
         executor.execute_once().unwrap();
         println!("{}", executor.get_display());
-        std::thread::sleep(Duration::from_secs(1));
+        std::thread::sleep(Duration::from_millis(100));
     }
 }
