@@ -41,6 +41,9 @@ impl Executor {
             Instruction::LoadVImm { reg_num, imm } => {
                 self.gp_registers[reg_num as usize].set(imm);
             }
+            Instruction::AddVImm { reg_num, imm } => {
+                self.gp_registers[reg_num as usize].add(imm);
+            }
             Instruction::LoadIImm { imm } => {
                 self.i.set(imm);
             }

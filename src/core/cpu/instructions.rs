@@ -12,6 +12,10 @@ pub enum Instruction {
     LoadIImm {
         imm: u16,
     },
+    AddVImm {
+        reg_num: u8,
+        imm: u8,
+    },
     Draw {
         x_reg_num: u8,
         y_reg_num: u8,
@@ -47,6 +51,11 @@ impl TryFrom<u16> for Instruction {
                     reg_num: register_num,
                     imm,
                 })
+            }
+            0x7000 => {
+                let imm = (value & 0x00FF) as u8;
+                let reg_num = ((value & 0x0F00) >> 8) as u8;
+                Ok(Instruction::AddVImm { reg_num, imm })
             }
             0xA000 => {
                 let imm = value & 0xFFF;

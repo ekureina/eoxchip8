@@ -33,6 +33,11 @@ impl RegisterV {
     pub fn set(&mut self, data: u8) {
         self.data = data;
     }
+
+    /// Adds to the value in this register
+    pub fn add(&mut self, value: u8) {
+        self.data += value;
+    }
 }
 
 impl Display for RegisterV {
