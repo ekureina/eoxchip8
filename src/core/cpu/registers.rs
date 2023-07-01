@@ -1,5 +1,7 @@
 use std::fmt::{Display, Formatter};
 
+use crate::core::memory::Address;
+
 #[derive(Default, Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq)]
 pub struct RegisterV {
     data: u8,
@@ -71,5 +73,32 @@ impl RegisterI {
 impl Display for RegisterI {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.data)
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq)]
+pub struct RegisterPC {
+    data: Address,
+}
+
+impl RegisterPC {
+    pub fn new() -> Self {
+        RegisterPC::default()
+    }
+
+    pub fn inc(&mut self) {
+        self.data.0 += 2;
+    }
+
+    pub fn get(&self) -> Address {
+        self.data
+    }
+}
+
+impl Default for RegisterPC {
+    fn default() -> Self {
+        RegisterPC {
+            data: Address(0x200),
+        }
     }
 }
