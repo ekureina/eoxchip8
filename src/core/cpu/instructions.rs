@@ -1,3 +1,4 @@
+use log::debug;
 use thiserror::Error;
 
 use crate::core::memory::Address;
@@ -81,6 +82,7 @@ impl TryFrom<u16> for Instruction {
             }
             0x7000 => {
                 let (reg_num, imm) = separate_register_and_imm(opcode);
+                debug!("Register Number: {reg_num}; Immediate: {imm}");
                 Ok(Instruction::AddVImm { reg_num, imm })
             }
             0xA000 => {

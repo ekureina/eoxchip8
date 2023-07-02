@@ -7,7 +7,7 @@ use crate::core::memory::{
 
 use super::{
     instructions::{Instruction, InstructionDecodeError},
-    registers::{RegisterI, RegisterPC, RegisterV},
+    registers::{RegisterF, RegisterI, RegisterPC, RegisterV},
 };
 
 #[derive(Default, Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq)]
@@ -17,6 +17,7 @@ pub struct Executor {
     display: Chip8Display,
     i: RegisterI,
     pc: RegisterPC,
+    flags: RegisterF,
 }
 
 impl Executor {
@@ -31,6 +32,7 @@ impl Executor {
         self.display = Chip8Display::default();
         self.gp_registers = [RegisterV::default(); 16];
         self.i = RegisterI::default();
+        self.flags = RegisterF::default();
         Ok(())
     }
 
@@ -38,13 +40,25 @@ impl Executor {
         let pc = self.pc.get();
         debug!("PC: {:?}", self.pc);
         self.pc.inc();
-        match self.memory.get_wide(pc)?.try_into()? {
+        let instruction = self.memory.get_wide(pc)?.try_into()?;
+        debug!("Instruction: {instruction:?}");
+        match instruction {
             Instruction::ClearScreen => self.display.clear(),
             Instruction::LoadVImm { reg_num, imm } => {
                 self.gp_registers[reg_num as usize].set(imm);
             }
             Instruction::AddVImm { reg_num, imm } => {
-                self.gp_registers[reg_num as usize].add(imm);
+                debug!("Register Number: {reg_num}; Immediate: {imm}");
+                debug!(
+                    "Register Data: {}",
+                    self.gp_registers[reg_num as usize].get()
+                );
+                // Explicitly not setting the flags register here
+                let _ = self.gp_registers[reg_num as usize].add(imm);
+                debug!(
+                    "Register Data: {}",
+                    self.gp_registers[reg_num as usize].get()
+                );
             }
             Instruction::SkipIfEqVImm { reg_num, imm } => {
                 if self.gp_registers[reg_num as usize].get() == imm {

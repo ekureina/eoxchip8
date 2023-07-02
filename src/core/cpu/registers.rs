@@ -35,8 +35,10 @@ impl RegisterV {
     }
 
     /// Adds to the value in this register
-    pub fn add(&mut self, value: u8) {
-        self.data += value;
+    pub fn add(&mut self, value: u8) -> bool {
+        let true_result = u16::from(self.data) + u16::from(value);
+        self.data = (true_result & 0x00FF) as u8;
+        (true_result & 0xFF00) != 0
     }
 }
 
@@ -115,5 +117,21 @@ impl Default for RegisterPC {
         RegisterPC {
             data: Address(0x200),
         }
+    }
+}
+
+#[derive(Default, Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq)]
+pub struct RegisterF {
+    carry: bool,
+}
+
+impl RegisterF {
+    #[must_use]
+    pub fn new() -> Self {
+        RegisterF::default()
+    }
+
+    pub fn set_carry(&mut self, value: bool) {
+        self.carry = value;
     }
 }

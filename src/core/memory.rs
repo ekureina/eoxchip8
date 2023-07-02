@@ -1,3 +1,4 @@
+use log::debug;
 use thiserror::Error;
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Ord, Eq)]
@@ -89,6 +90,7 @@ impl Chip8Display {
 
     /// Flips a pixel in the Chip8's display
     pub fn flip_pixel(&mut self, x: u8, y: u8) {
+        debug!("Flipping pixel at ({x}, {y})");
         self.data[y as usize][x as usize] ^= true;
     }
 
