@@ -1,3 +1,4 @@
+use log::debug;
 use thiserror::Error;
 
 use crate::core::memory::{
@@ -35,6 +36,7 @@ impl Executor {
 
     pub fn execute_once(&mut self) -> Result<(), ExecutionError> {
         let pc = self.pc.get();
+        debug!("PC: {:?}", self.pc);
         self.pc.inc();
         match self.memory.get_wide(pc)?.try_into()? {
             Instruction::ClearScreen => self.display.clear(),

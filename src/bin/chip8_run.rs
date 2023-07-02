@@ -1,6 +1,7 @@
 use std::{fs::File, io::Read, path::PathBuf, time::Duration};
 
 use clap::Parser;
+use log::error;
 use rc8::core::cpu::main::Executor;
 
 #[derive(Debug, Parser, PartialEq, Eq, PartialOrd, Ord)]
@@ -10,6 +11,8 @@ struct Chip8RunArgs {
 }
 
 fn main() {
+    env_logger::init();
+
     let args = Chip8RunArgs::parse();
     let mut rom = File::open(args.program_path).unwrap();
     let mut program = vec![];
@@ -17,7 +20,9 @@ fn main() {
     let mut executor = Executor::new();
     executor.load_program(&program).unwrap();
     loop {
-        executor.execute_once().unwrap();
+        if let Err(error) = executor.execute_once() {
+            error!("{error}");
+        }
         println!("{}", executor.get_display());
         std::thread::sleep(Duration::from_millis(100));
     }
