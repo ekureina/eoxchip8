@@ -51,6 +51,11 @@ impl Executor {
                     self.pc.inc();
                 }
             }
+            Instruction::SkipIfNotEqVImm { reg_num, imm } => {
+                if self.gp_registers[reg_num as usize].get() != imm {
+                    self.pc.inc();
+                }
+            }
             Instruction::LoadIImm { imm } => {
                 self.i.set(imm);
             }

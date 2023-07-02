@@ -31,6 +31,10 @@ pub enum Instruction {
         reg_num: u8,
         imm: u8,
     },
+    SkipIfNotEqVImm {
+        reg_num: u8,
+        imm: u8,
+    },
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq, Error)]
@@ -51,6 +55,10 @@ impl TryFrom<u16> for Instruction {
             0x3000 => {
                 let (reg_num, imm) = separate_register_and_imm(opcode);
                 Ok(Instruction::SkipIfEqVImm { reg_num, imm })
+            }
+            0x4000 => {
+                let (reg_num, imm) = separate_register_and_imm(opcode);
+                Ok(Instruction::SkipIfNotEqVImm { reg_num, imm })
             }
             0x6000 => {
                 let (reg_num, imm) = separate_register_and_imm(opcode);
