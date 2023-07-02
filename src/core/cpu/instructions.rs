@@ -27,7 +27,7 @@ pub enum Instruction {
     Sys {
         address: Address,
     },
-    SkipIfNotEqVImm {
+    SkipIfEqVImm {
         reg_num: u8,
         imm: u8,
     },
@@ -50,7 +50,7 @@ impl TryFrom<u16> for Instruction {
         match opcode & 0xF000 {
             0x3000 => {
                 let (reg_num, imm) = separate_register_and_imm(opcode);
-                Ok(Instruction::SkipIfNotEqVImm { reg_num, imm })
+                Ok(Instruction::SkipIfEqVImm { reg_num, imm })
             }
             0x6000 => {
                 let (reg_num, imm) = separate_register_and_imm(opcode);

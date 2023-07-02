@@ -46,7 +46,7 @@ impl Executor {
             Instruction::AddVImm { reg_num, imm } => {
                 self.gp_registers[reg_num as usize].add(imm);
             }
-            Instruction::SkipIfNotEqVImm { reg_num, imm } => {
+            Instruction::SkipIfEqVImm { reg_num, imm } => {
                 if self.gp_registers[reg_num as usize].get() == imm {
                     self.pc.inc();
                 }
