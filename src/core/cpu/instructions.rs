@@ -42,38 +42,32 @@ pub enum InstructionDecodeError {
 impl TryFrom<u16> for Instruction {
     type Error = InstructionDecodeError;
 
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        if value == 0x00E0 {
+    fn try_from(opcode: u16) -> Result<Self, Self::Error> {
+        if opcode == 0x00E0 {
             return Ok(Instruction::ClearScreen);
         }
 
-        match value & 0xF000 {
+        match opcode & 0xF000 {
             0x3000 => {
-                let reg_num = ((value & 0x0F00) >> 8) as u8;
-                let imm = (value & 0x00FF) as u8;
+                let (reg_num, imm) = separate_register_and_imm(opcode);
                 Ok(Instruction::SkipIfNotEqVImm { reg_num, imm })
             }
             0x6000 => {
-                let register_num = ((value & 0x0F00) >> 8) as u8;
-                let imm = (value & 0x00FF) as u8;
-                Ok(Instruction::LoadVImm {
-                    reg_num: register_num,
-                    imm,
-                })
+                let (reg_num, imm) = separate_register_and_imm(opcode);
+                Ok(Instruction::LoadVImm { reg_num, imm })
             }
             0x7000 => {
-                let imm = (value & 0x00FF) as u8;
-                let reg_num = ((value & 0x0F00) >> 8) as u8;
+                let (reg_num, imm) = separate_register_and_imm(opcode);
                 Ok(Instruction::AddVImm { reg_num, imm })
             }
             0xA000 => {
-                let imm = value & 0xFFF;
+                let imm = opcode & 0xFFF;
                 Ok(Instruction::LoadIImm { imm })
             }
             0xD000 => {
-                let x_reg_num = ((value & 0x0F00) >> 8) as u8;
-                let y_reg_num = ((value & 0x00F0) >> 4) as u8;
-                let sprite_length = (value & 0x000F) as u8;
+                let x_reg_num = ((opcode & 0x0F00) >> 8) as u8;
+                let y_reg_num = ((opcode & 0x00F0) >> 4) as u8;
+                let sprite_length = (opcode & 0x000F) as u8;
                 Ok(Instruction::Draw {
                     x_reg_num,
                     y_reg_num,
@@ -81,14 +75,20 @@ impl TryFrom<u16> for Instruction {
                 })
             }
             0x0000 => {
-                let address = Address(value & 0x0FFF);
+                let address = Address(opcode & 0x0FFF);
                 Ok(Instruction::Sys { address })
             }
             0x1000 => {
-                let address = Address(value & 0x0FFF);
+                let address = Address(opcode & 0x0FFF);
                 Ok(Instruction::JumpTo { address })
             }
-            _ => Err(InstructionDecodeError::UnknownInstruction(value)),
+            _ => Err(InstructionDecodeError::UnknownInstruction(opcode)),
         }
     }
+}
+
+fn separate_register_and_imm(opcode: u16) -> (u8, u8) {
+    let register_index = ((opcode & 0x0F00) >> 8) as u8;
+    let immediate = (opcode & 0x00FF) as u8;
+    (register_index, immediate)
 }
