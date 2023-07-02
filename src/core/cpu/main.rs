@@ -80,6 +80,16 @@ impl Executor {
                     self.pc.inc();
                 }
             }
+            Instruction::SkipIfNotEqualV2 {
+                x_reg_num,
+                y_reg_num,
+            } => {
+                if self.gp_registers[x_reg_num as usize].get()
+                    != self.gp_registers[y_reg_num as usize].get()
+                {
+                    self.pc.inc();
+                }
+            }
             Instruction::LoadIImm { imm } => {
                 self.i.set(imm);
             }

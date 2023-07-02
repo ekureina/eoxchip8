@@ -40,6 +40,10 @@ pub enum Instruction {
         x_reg_num: u8,
         y_reg_num: u8,
     },
+    SkipIfNotEqualV2 {
+        x_reg_num: u8,
+        y_reg_num: u8,
+    },
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq, Error)]
@@ -84,6 +88,17 @@ impl TryFrom<u16> for Instruction {
                 let (reg_num, imm) = separate_register_and_imm(opcode);
                 debug!("Register Number: {reg_num}; Immediate: {imm}");
                 Ok(Instruction::AddVImm { reg_num, imm })
+            }
+            0x9000 => {
+                let (x_reg_num, y_reg_num, last_nibble) = separate_two_registers_and_nibble(opcode);
+                if last_nibble == 0 {
+                    Ok(Instruction::SkipIfNotEqualV2 {
+                        x_reg_num,
+                        y_reg_num,
+                    })
+                } else {
+                    Err(InstructionDecodeError::UnknownInstruction(opcode))
+                }
             }
             0xA000 => {
                 let imm = opcode & 0xFFF;
