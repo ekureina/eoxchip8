@@ -6,6 +6,10 @@ use crate::core::memory::Address;
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq)]
 pub enum Instruction {
     ClearScreen,
+    Call {
+        address: Address,
+    },
+    Return,
     LoadVImm {
         reg_num: u8,
         imm: u8,
@@ -60,7 +64,19 @@ impl TryFrom<u16> for Instruction {
             return Ok(Instruction::ClearScreen);
         }
 
+        if opcode == 0x00EE {
+            return Ok(Instruction::Return);
+        }
+
         match opcode & 0xF000 {
+            0x1000 => {
+                let address = Address(opcode & 0x0FFF);
+                Ok(Instruction::JumpTo { address })
+            }
+            0x2000 => {
+                let address = Address(opcode & 0x0FFF);
+                Ok(Instruction::Call { address })
+            }
             0x3000 => {
                 let (reg_num, imm) = separate_register_and_imm(opcode);
                 Ok(Instruction::SkipIfEqVImm { reg_num, imm })
@@ -116,10 +132,6 @@ impl TryFrom<u16> for Instruction {
             0x0000 => {
                 let address = Address(opcode & 0x0FFF);
                 Ok(Instruction::Sys { address })
-            }
-            0x1000 => {
-                let address = Address(opcode & 0x0FFF);
-                Ok(Instruction::JumpTo { address })
             }
             _ => Err(InstructionDecodeError::UnknownInstruction(opcode)),
         }

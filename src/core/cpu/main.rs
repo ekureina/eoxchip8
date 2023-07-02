@@ -10,7 +10,7 @@ use super::{
     registers::{RegisterF, RegisterI, RegisterPC, RegisterV},
 };
 
-#[derive(Default, Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq)]
+#[derive(Default, Debug, Clone, PartialEq, PartialOrd, Ord, Eq)]
 pub struct Executor {
     memory: Ram,
     gp_registers: [RegisterV; 16],
@@ -18,6 +18,7 @@ pub struct Executor {
     i: RegisterI,
     pc: RegisterPC,
     flags: RegisterF,
+    stack: Vec<Address>,
 }
 
 impl Executor {
@@ -44,6 +45,14 @@ impl Executor {
         debug!("Instruction: {instruction:?}");
         match instruction {
             Instruction::ClearScreen => self.display.clear(),
+            Instruction::Return => {
+                let return_address = self.stack.pop().ok_or(ExecutionError::StackPopFail)?;
+                self.pc.set(return_address);
+            }
+            Instruction::Call { address } => {
+                self.stack.push(self.pc.get());
+                self.pc.set(address);
+            }
             Instruction::LoadVImm { reg_num, imm } => {
                 self.gp_registers[reg_num as usize].set(imm);
             }
@@ -151,4 +160,6 @@ pub enum ExecutionError {
     MemoryAccess(#[from] MemoryAccessError),
     #[error("Error on decoding instruction: '{0}'")]
     InstructionDecode(#[from] InstructionDecodeError),
+    #[error("Issue popping the stack")]
+    StackPopFail,
 }
