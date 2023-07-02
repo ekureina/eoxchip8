@@ -35,6 +35,10 @@ pub enum Instruction {
         reg_num: u8,
         imm: u8,
     },
+    SkipIfEqualV2 {
+        x_reg_num: u8,
+        y_reg_num: u8,
+    },
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq, Error)]
@@ -60,6 +64,17 @@ impl TryFrom<u16> for Instruction {
                 let (reg_num, imm) = separate_register_and_imm(opcode);
                 Ok(Instruction::SkipIfNotEqVImm { reg_num, imm })
             }
+            0x5000 => {
+                let (x_reg_num, y_reg_num, last_nibble) = separate_two_registers_and_nibble(opcode);
+                if last_nibble == 0 {
+                    Ok(Instruction::SkipIfEqualV2 {
+                        x_reg_num,
+                        y_reg_num,
+                    })
+                } else {
+                    Err(InstructionDecodeError::UnknownInstruction(opcode))
+                }
+            }
             0x6000 => {
                 let (reg_num, imm) = separate_register_and_imm(opcode);
                 Ok(Instruction::LoadVImm { reg_num, imm })
@@ -73,9 +88,8 @@ impl TryFrom<u16> for Instruction {
                 Ok(Instruction::LoadIImm { imm })
             }
             0xD000 => {
-                let x_reg_num = ((opcode & 0x0F00) >> 8) as u8;
-                let y_reg_num = ((opcode & 0x00F0) >> 4) as u8;
-                let sprite_length = (opcode & 0x000F) as u8;
+                let (x_reg_num, y_reg_num, sprite_length) =
+                    separate_two_registers_and_nibble(opcode);
                 Ok(Instruction::Draw {
                     x_reg_num,
                     y_reg_num,
@@ -99,4 +113,11 @@ fn separate_register_and_imm(opcode: u16) -> (u8, u8) {
     let register_index = ((opcode & 0x0F00) >> 8) as u8;
     let immediate = (opcode & 0x00FF) as u8;
     (register_index, immediate)
+}
+
+fn separate_two_registers_and_nibble(opcode: u16) -> (u8, u8, u8) {
+    let register_index_1 = ((opcode & 0x0F00) >> 8) as u8;
+    let register_index_2 = ((opcode & 0x00F0) >> 4) as u8;
+    let nibble = (opcode & 0x000F) as u8;
+    (register_index_1, register_index_2, nibble)
 }
