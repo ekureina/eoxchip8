@@ -27,6 +27,10 @@ pub enum Instruction {
     Sys {
         address: Address,
     },
+    SkipIfNotEqVImm {
+        reg_num: u8,
+        imm: u8,
+    },
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq, Error)]
@@ -44,6 +48,11 @@ impl TryFrom<u16> for Instruction {
         }
 
         match value & 0xF000 {
+            0x3000 => {
+                let reg_num = ((value & 0x0F00) >> 8) as u8;
+                let imm = (value & 0x00FF) as u8;
+                Ok(Instruction::SkipIfNotEqVImm { reg_num, imm })
+            }
             0x6000 => {
                 let register_num = ((value & 0x0F00) >> 8) as u8;
                 let imm = (value & 0x00FF) as u8;
