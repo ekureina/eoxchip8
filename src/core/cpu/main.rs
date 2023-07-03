@@ -19,12 +19,16 @@ pub struct Executor {
     pc: RegisterPC,
     flags: RegisterF,
     stack: Vec<Address>,
+    legacy_shift: bool,
 }
 
 impl Executor {
     #[must_use]
-    pub fn new() -> Self {
-        Executor::default()
+    pub fn new(legacy_shift: bool) -> Self {
+        Executor {
+            legacy_shift,
+            ..Default::default()
+        }
     }
 
     pub fn load_program(&mut self, program: &[u8]) -> Result<(), MemoryAccessError> {
@@ -174,6 +178,18 @@ impl Executor {
                     .get()
                     .wrapping_sub(self.gp_registers[x_reg_num as usize].get());
                 self.gp_registers[x_reg_num as usize].set(result);
+            }
+            Instruction::ShiftRight {
+                x_reg_num,
+                y_reg_num,
+            } => {
+                let used_register = if self.legacy_shift {
+                    self.gp_registers[y_reg_num as usize].get()
+                } else {
+                    self.gp_registers[x_reg_num as usize].get()
+                };
+                self.flags.set((used_register & 0x1) != 0);
+                self.gp_registers[x_reg_num as usize].set(used_register >> 1);
             }
             Instruction::Sys { .. } => {}
         }

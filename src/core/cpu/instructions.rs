@@ -76,6 +76,10 @@ pub enum Instruction {
         x_reg_num: u8,
         y_reg_num: u8,
     },
+    ShiftRight {
+        x_reg_num: u8,
+        y_reg_num: u8,
+    },
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq, Error)]
@@ -87,6 +91,7 @@ pub enum InstructionDecodeError {
 impl TryFrom<u16> for Instruction {
     type Error = InstructionDecodeError;
 
+    #[allow(clippy::too_many_lines)]
     fn try_from(opcode: u16) -> Result<Self, Self::Error> {
         if opcode == 0x00E0 {
             return Ok(Instruction::ClearScreen);
@@ -157,6 +162,10 @@ impl TryFrom<u16> for Instruction {
                         y_reg_num,
                     }),
                     5 => Ok(Instruction::SubV2 {
+                        x_reg_num,
+                        y_reg_num,
+                    }),
+                    6 => Ok(Instruction::ShiftRight {
                         x_reg_num,
                         y_reg_num,
                     }),
