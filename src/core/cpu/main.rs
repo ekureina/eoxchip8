@@ -112,6 +112,13 @@ impl Executor {
             Instruction::JumpTo { address } => {
                 self.pc.set(address);
             }
+            Instruction::SetEqual {
+                x_reg_num,
+                y_reg_num,
+            } => {
+                self.gp_registers[x_reg_num as usize]
+                    .set(self.gp_registers[y_reg_num as usize].get());
+            }
             Instruction::Sys { .. } => {}
         }
         Ok(())
