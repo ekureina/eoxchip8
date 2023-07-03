@@ -76,6 +76,10 @@ impl RegisterI {
         self.data
     }
 
+    pub fn add(&mut self, value: u8) {
+        self.data += u16::from(value);
+    }
+
     /// Sets the value in this register
     /// ```
     /// # use rc8::core::cpu::registers::RegisterI;

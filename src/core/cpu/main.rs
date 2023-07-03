@@ -227,6 +227,9 @@ impl Executor {
                 self.memory.set(Address(root_address + 1), second_digit)?;
                 self.memory.set(Address(root_address + 2), third_digit)?;
             }
+            Instruction::AddIV { register_num } => {
+                self.i.add(self.gp_registers[register_num as usize].get());
+            }
             Instruction::Sys { .. } => {}
         }
         Ok(())

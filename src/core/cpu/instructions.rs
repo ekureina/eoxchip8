@@ -93,6 +93,9 @@ pub enum Instruction {
     BCDRegister {
         register_num: u8,
     },
+    AddIV {
+        register_num: u8,
+    },
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq, Error)]
@@ -227,6 +230,7 @@ impl TryFrom<u16> for Instruction {
                         max_reg_num: register_num,
                     }),
                     0x33 => Ok(Instruction::BCDRegister { register_num }),
+                    0x1E => Ok(Instruction::AddIV { register_num }),
                     _ => Err(InstructionDecodeError::UnknownInstruction(opcode)),
                 }
             }
