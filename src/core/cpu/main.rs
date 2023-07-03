@@ -127,6 +127,14 @@ impl Executor {
                 let bit_or_val = self.gp_registers[y_reg_num as usize].get();
                 self.gp_registers[x_reg_num as usize].set(current_val | bit_or_val);
             }
+            Instruction::BitWiseAndEqual {
+                x_reg_num,
+                y_reg_num,
+            } => {
+                let current_val = self.gp_registers[x_reg_num as usize].get();
+                let bit_or_val = self.gp_registers[y_reg_num as usize].get();
+                self.gp_registers[x_reg_num as usize].set(current_val & bit_or_val);
+            }
             Instruction::Sys { .. } => {}
         }
         Ok(())
