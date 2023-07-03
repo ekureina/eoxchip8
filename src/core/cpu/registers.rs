@@ -129,19 +129,3 @@ impl Default for RegisterPC {
         }
     }
 }
-
-#[derive(Default, Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq)]
-pub struct RegisterF {
-    data: bool,
-}
-
-impl RegisterF {
-    #[must_use]
-    pub fn new() -> Self {
-        RegisterF::default()
-    }
-
-    pub fn set(&mut self, value: bool) {
-        self.data = value;
-    }
-}

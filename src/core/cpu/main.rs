@@ -7,7 +7,7 @@ use crate::core::memory::{
 
 use super::{
     instructions::{Instruction, InstructionDecodeError},
-    registers::{RegisterF, RegisterI, RegisterPC, RegisterV},
+    registers::{RegisterI, RegisterPC, RegisterV},
 };
 
 #[derive(Default, Debug, Clone, PartialEq, PartialOrd, Ord, Eq)]
@@ -17,7 +17,6 @@ pub struct Executor {
     display: Chip8Display,
     i: RegisterI,
     pc: RegisterPC,
-    flags: RegisterF,
     stack: Vec<Address>,
     legacy_shift: bool,
 }
@@ -37,7 +36,6 @@ impl Executor {
         self.display = Chip8Display::default();
         self.gp_registers = [RegisterV::default(); 16];
         self.i = RegisterI::default();
-        self.flags = RegisterF::default();
         Ok(())
     }
 
@@ -152,25 +150,23 @@ impl Executor {
                 x_reg_num,
                 y_reg_num,
             } => {
-                self.flags.set(
-                    self.gp_registers[x_reg_num as usize]
-                        .add(self.gp_registers[y_reg_num as usize].get()),
-                );
+                let flag_result = self.gp_registers[x_reg_num as usize]
+                    .add(self.gp_registers[y_reg_num as usize].get());
+                self.set_flag_register(flag_result);
             }
             Instruction::SubV2 {
                 x_reg_num,
                 y_reg_num,
             } => {
-                self.flags.set(
-                    self.gp_registers[x_reg_num as usize]
-                        .sub(self.gp_registers[y_reg_num as usize].get()),
-                );
+                let flag_result = self.gp_registers[x_reg_num as usize]
+                    .sub(self.gp_registers[y_reg_num as usize].get());
+                self.set_flag_register(flag_result);
             }
             Instruction::SubNV2 {
                 x_reg_num,
                 y_reg_num,
             } => {
-                self.flags.set(
+                self.set_flag_register(
                     self.gp_registers[y_reg_num as usize].get()
                         > self.gp_registers[x_reg_num as usize].get(),
                 );
@@ -188,8 +184,8 @@ impl Executor {
                 } else {
                     self.gp_registers[x_reg_num as usize].get()
                 };
-                self.flags.set((used_register & 0x1) != 0);
                 self.gp_registers[x_reg_num as usize].set(used_register >> 1);
+                self.set_flag_register((used_register & 0x1) != 0);
             }
             Instruction::ShiftLeft {
                 x_reg_num,
@@ -200,8 +196,8 @@ impl Executor {
                 } else {
                     self.gp_registers[x_reg_num as usize].get()
                 };
-                self.flags.set((used_register & 0x80) != 0);
                 self.gp_registers[x_reg_num as usize].set(used_register << 1);
+                self.set_flag_register((used_register & 0x80) != 0);
             }
             Instruction::LoadRegistersFromMem { max_reg_num } => {
                 let start_mem = self.i.get();
@@ -276,6 +272,14 @@ impl Executor {
         let second_digit = (data % 100) / 10;
         let third_digit = data % 10;
         (first_digit, second_digit, third_digit)
+    }
+
+    fn set_flag_register(&mut self, flag: bool) {
+        if flag {
+            self.gp_registers[15].set(1);
+        } else {
+            self.gp_registers[15].set(0);
+        }
     }
 }
 
