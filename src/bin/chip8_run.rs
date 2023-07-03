@@ -23,7 +23,11 @@ fn main() {
         if let Err(error) = executor.execute_once() {
             error!("{error}");
         }
-        println!("{}", executor.get_display());
+        let display = executor.get_display_mut();
+        if display.has_changed() {
+            println!("{}", display);
+            display.render();
+        }
         std::thread::sleep(Duration::from_millis(100));
     }
 }

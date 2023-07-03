@@ -133,8 +133,8 @@ impl Executor {
     }
 
     #[must_use]
-    pub fn get_display(&self) -> &Chip8Display {
-        &self.display
+    pub fn get_display_mut(&mut self) -> &mut Chip8Display {
+        &mut self.display
     }
 
     #[allow(clippy::cast_possible_truncation)]

@@ -75,6 +75,7 @@ impl Default for Ram {
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Ord, Eq)]
 pub struct Chip8Display {
     data: [[bool; 64]; 32],
+    has_changed: bool,
 }
 
 impl Chip8Display {
@@ -86,12 +87,14 @@ impl Chip8Display {
     /// Clears the Chip8's display
     pub fn clear(&mut self) {
         self.data = [[false; 64]; 32];
+        self.has_changed = true;
     }
 
     /// Flips a pixel in the Chip8's display
     pub fn flip_pixel(&mut self, x: u8, y: u8) {
         debug!("Flipping pixel at ({x}, {y})");
         self.data[y as usize][x as usize] ^= true;
+        self.has_changed = true;
     }
 
     /// Gets a reference to the Chip8's display memory
@@ -99,12 +102,22 @@ impl Chip8Display {
     pub fn get(&self) -> &[[bool; 64]] {
         &self.data
     }
+
+    #[must_use]
+    pub fn has_changed(&self) -> bool {
+        self.has_changed
+    }
+
+    pub fn render(&mut self) {
+        self.has_changed = false;
+    }
 }
 
 impl Default for Chip8Display {
     fn default() -> Self {
         Chip8Display {
             data: [[false; 64]; 32],
+            has_changed: false,
         }
     }
 }
