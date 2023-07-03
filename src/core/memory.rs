@@ -121,6 +121,18 @@ impl Chip8Display {
     pub fn render(&mut self) {
         self.has_changed = false;
     }
+
+    #[must_use]
+    #[allow(clippy::cast_possible_truncation)]
+    pub fn x_len(&self) -> u8 {
+        self.data[0].len() as u8
+    }
+
+    #[must_use]
+    #[allow(clippy::cast_possible_truncation)]
+    pub fn y_len(&self) -> u8 {
+        self.data.len() as u8
+    }
 }
 
 impl Default for Chip8Display {

@@ -254,10 +254,18 @@ impl Executor {
 
         let sprite_flips = memory_to_flip_instructions(&sprite_direct_memory);
 
-        let start_x = self.gp_registers[x_reg_num as usize].get();
-        let start_y = self.gp_registers[y_reg_num as usize].get();
+        let start_x = self.gp_registers[x_reg_num as usize].get() % self.display.x_len();
+        let start_y = self.gp_registers[y_reg_num as usize].get() % self.display.y_len();
         for offset_x in 0..(u8::BITS as u8) {
+            if (start_x + offset_x) >= self.display.x_len() {
+                break;
+            }
+
             for offset_y in 0..sprite_length {
+                if (start_y + offset_y) >= self.display.y_len() {
+                    break;
+                }
+
                 if sprite_flips[offset_y as usize][offset_x as usize] {
                     self.display
                         .flip_pixel(start_x + offset_x, start_y + offset_y);
