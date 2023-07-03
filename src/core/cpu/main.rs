@@ -37,6 +37,7 @@ impl Executor {
         Ok(())
     }
 
+    #[allow(clippy::too_many_lines)]
     pub fn execute_once(&mut self) -> Result<(), ExecutionError> {
         let pc = self.pc.get();
         debug!("PC: {:?}", self.pc);
@@ -134,6 +135,14 @@ impl Executor {
                 let current_val = self.gp_registers[x_reg_num as usize].get();
                 let bit_or_val = self.gp_registers[y_reg_num as usize].get();
                 self.gp_registers[x_reg_num as usize].set(current_val & bit_or_val);
+            }
+            Instruction::BitWiseXorEqual {
+                x_reg_num,
+                y_reg_num,
+            } => {
+                let current_val = self.gp_registers[x_reg_num as usize].get();
+                let bit_or_val = self.gp_registers[y_reg_num as usize].get();
+                self.gp_registers[x_reg_num as usize].set(current_val ^ bit_or_val);
             }
             Instruction::Sys { .. } => {}
         }

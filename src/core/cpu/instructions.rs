@@ -60,6 +60,10 @@ pub enum Instruction {
         x_reg_num: u8,
         y_reg_num: u8,
     },
+    BitWiseXorEqual {
+        x_reg_num: u8,
+        y_reg_num: u8,
+    },
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq, Error)]
@@ -129,6 +133,10 @@ impl TryFrom<u16> for Instruction {
                         y_reg_num,
                     }),
                     2 => Ok(Instruction::BitWiseAndEqual {
+                        x_reg_num,
+                        y_reg_num,
+                    }),
+                    3 => Ok(Instruction::BitWiseXorEqual {
                         x_reg_num,
                         y_reg_num,
                     }),
