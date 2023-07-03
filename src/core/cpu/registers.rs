@@ -122,7 +122,7 @@ impl Default for RegisterPC {
 
 #[derive(Default, Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq)]
 pub struct RegisterF {
-    carry: bool,
+    data: bool,
 }
 
 impl RegisterF {
@@ -131,7 +131,7 @@ impl RegisterF {
         RegisterF::default()
     }
 
-    pub fn set_carry(&mut self, value: bool) {
-        self.carry = value;
+    pub fn set(&mut self, value: bool) {
+        self.data = value;
     }
 }
