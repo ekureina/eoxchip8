@@ -52,6 +52,10 @@ pub enum Instruction {
         x_reg_num: u8,
         y_reg_num: u8,
     },
+    BitWiseOrEqual {
+        x_reg_num: u8,
+        y_reg_num: u8,
+    },
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq, Error)]
@@ -113,6 +117,10 @@ impl TryFrom<u16> for Instruction {
                 let (x_reg_num, y_reg_num, last_nibble) = separate_two_registers_and_nibble(opcode);
                 match last_nibble {
                     0 => Ok(Instruction::SetEqual {
+                        x_reg_num,
+                        y_reg_num,
+                    }),
+                    1 => Ok(Instruction::BitWiseOrEqual {
                         x_reg_num,
                         y_reg_num,
                     }),
