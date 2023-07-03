@@ -153,6 +153,15 @@ impl Executor {
                         .add(self.gp_registers[y_reg_num as usize].get()),
                 );
             }
+            Instruction::SubV2 {
+                x_reg_num,
+                y_reg_num,
+            } => {
+                self.flags.set(
+                    self.gp_registers[x_reg_num as usize]
+                        .sub(self.gp_registers[y_reg_num as usize].get()),
+                );
+            }
             Instruction::Sys { .. } => {}
         }
         Ok(())

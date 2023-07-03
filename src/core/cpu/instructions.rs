@@ -68,6 +68,10 @@ pub enum Instruction {
         x_reg_num: u8,
         y_reg_num: u8,
     },
+    SubV2 {
+        x_reg_num: u8,
+        y_reg_num: u8,
+    },
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq, Error)]
@@ -145,6 +149,10 @@ impl TryFrom<u16> for Instruction {
                         y_reg_num,
                     }),
                     4 => Ok(Instruction::AddV2 {
+                        x_reg_num,
+                        y_reg_num,
+                    }),
+                    5 => Ok(Instruction::SubV2 {
                         x_reg_num,
                         y_reg_num,
                     }),

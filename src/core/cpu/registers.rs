@@ -40,6 +40,12 @@ impl RegisterV {
         self.data = (true_result & 0x00FF) as u8;
         (true_result & 0xFF00) != 0
     }
+    /// Subtracts from the value in this register
+    pub fn sub(&mut self, value: u8) -> bool {
+        let not_borrow = self.data > value;
+        self.data = self.data.wrapping_sub(value);
+        not_borrow
+    }
 }
 
 impl Display for RegisterV {
