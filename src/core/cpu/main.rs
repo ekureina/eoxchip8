@@ -203,6 +203,13 @@ impl Executor {
                 self.flags.set((used_register & 0x80) != 0);
                 self.gp_registers[x_reg_num as usize].set(used_register << 1);
             }
+            Instruction::LoadRegistersFromMem { max_reg_num } => {
+                let start_mem = self.i.get();
+                for offset in 0..=max_reg_num {
+                    self.gp_registers[offset as usize]
+                        .set(self.memory.get(Address(start_mem + u16::from(offset)))?);
+                }
+            }
             Instruction::Sys { .. } => {}
         }
         Ok(())
