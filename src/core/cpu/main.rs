@@ -162,6 +162,19 @@ impl Executor {
                         .sub(self.gp_registers[y_reg_num as usize].get()),
                 );
             }
+            Instruction::SubNV2 {
+                x_reg_num,
+                y_reg_num,
+            } => {
+                self.flags.set(
+                    self.gp_registers[y_reg_num as usize].get()
+                        > self.gp_registers[x_reg_num as usize].get(),
+                );
+                let result = self.gp_registers[y_reg_num as usize]
+                    .get()
+                    .wrapping_sub(self.gp_registers[x_reg_num as usize].get());
+                self.gp_registers[x_reg_num as usize].set(result);
+            }
             Instruction::Sys { .. } => {}
         }
         Ok(())
