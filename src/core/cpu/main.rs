@@ -166,14 +166,14 @@ impl Executor {
                 x_reg_num,
                 y_reg_num,
             } => {
-                self.set_flag_register(
-                    self.gp_registers[y_reg_num as usize].get()
-                        > self.gp_registers[x_reg_num as usize].get(),
-                );
                 let result = self.gp_registers[y_reg_num as usize]
                     .get()
                     .wrapping_sub(self.gp_registers[x_reg_num as usize].get());
                 self.gp_registers[x_reg_num as usize].set(result);
+                self.set_flag_register(
+                    self.gp_registers[y_reg_num as usize].get()
+                        > self.gp_registers[x_reg_num as usize].get(),
+                );
             }
             Instruction::ShiftRight {
                 x_reg_num,
