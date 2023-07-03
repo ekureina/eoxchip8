@@ -80,6 +80,10 @@ pub enum Instruction {
         x_reg_num: u8,
         y_reg_num: u8,
     },
+    ShiftLeft {
+        x_reg_num: u8,
+        y_reg_num: u8,
+    },
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq, Error)]
@@ -170,6 +174,10 @@ impl TryFrom<u16> for Instruction {
                         y_reg_num,
                     }),
                     7 => Ok(Instruction::SubNV2 {
+                        x_reg_num,
+                        y_reg_num,
+                    }),
+                    0xE => Ok(Instruction::ShiftLeft {
                         x_reg_num,
                         y_reg_num,
                     }),

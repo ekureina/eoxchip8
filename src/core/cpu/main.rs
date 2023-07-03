@@ -191,6 +191,18 @@ impl Executor {
                 self.flags.set((used_register & 0x1) != 0);
                 self.gp_registers[x_reg_num as usize].set(used_register >> 1);
             }
+            Instruction::ShiftLeft {
+                x_reg_num,
+                y_reg_num,
+            } => {
+                let used_register = if self.legacy_shift {
+                    self.gp_registers[y_reg_num as usize].get()
+                } else {
+                    self.gp_registers[x_reg_num as usize].get()
+                };
+                self.flags.set((used_register & 0x80) != 0);
+                self.gp_registers[x_reg_num as usize].set(used_register << 1);
+            }
             Instruction::Sys { .. } => {}
         }
         Ok(())
