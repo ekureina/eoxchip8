@@ -41,6 +41,16 @@ impl Ram {
         Ok(self.data[address.0 as usize])
     }
 
+    pub fn set(&mut self, address: Address, data: u8) -> MemoryResult<()> {
+        if address.0 as usize >= self.data.len() {
+            return Err(MemoryAccessError::AddressOutOfBounds(address));
+        }
+
+        self.data[address.0 as usize] = data;
+
+        Ok(())
+    }
+
     pub fn get_wide(&self, address: Address) -> MemoryResult<u16> {
         if address.0 % 2 != 0 {
             return Err(MemoryAccessError::AddressUnaligned(address));

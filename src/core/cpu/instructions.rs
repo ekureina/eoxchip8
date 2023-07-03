@@ -87,6 +87,9 @@ pub enum Instruction {
     LoadRegistersFromMem {
         max_reg_num: u8,
     },
+    SaveRegistersToMem {
+        max_reg_num: u8,
+    },
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq, Error)]
@@ -215,6 +218,9 @@ impl TryFrom<u16> for Instruction {
                 let (register_num, specifier) = separate_register_and_imm(opcode);
                 match specifier {
                     0x65 => Ok(Instruction::LoadRegistersFromMem {
+                        max_reg_num: register_num,
+                    }),
+                    0x55 => Ok(Instruction::SaveRegistersToMem {
                         max_reg_num: register_num,
                     }),
                     _ => Err(InstructionDecodeError::UnknownInstruction(opcode)),

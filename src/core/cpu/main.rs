@@ -210,6 +210,15 @@ impl Executor {
                         .set(self.memory.get(Address(start_mem + u16::from(offset)))?);
                 }
             }
+            Instruction::SaveRegistersToMem { max_reg_num } => {
+                let start_mem = self.i.get();
+                for offset in 0..=max_reg_num {
+                    self.memory.set(
+                        Address(start_mem + u16::from(offset)),
+                        self.gp_registers[offset as usize].get(),
+                    )?;
+                }
+            }
             Instruction::Sys { .. } => {}
         }
         Ok(())
