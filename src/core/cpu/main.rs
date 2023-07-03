@@ -219,6 +219,14 @@ impl Executor {
                     )?;
                 }
             }
+            Instruction::BCDRegister { register_num } => {
+                let (first_digit, second_digit, third_digit) =
+                    Executor::bcd(self.gp_registers[register_num as usize].get());
+                let root_address = self.i.get();
+                self.memory.set(Address(root_address), first_digit)?;
+                self.memory.set(Address(root_address + 1), second_digit)?;
+                self.memory.set(Address(root_address + 2), third_digit)?;
+            }
             Instruction::Sys { .. } => {}
         }
         Ok(())
@@ -258,6 +266,13 @@ impl Executor {
             }
         }
         Ok(())
+    }
+
+    fn bcd(data: u8) -> (u8, u8, u8) {
+        let first_digit = data / 100;
+        let second_digit = (data % 100) / 10;
+        let third_digit = data % 10;
+        (first_digit, second_digit, third_digit)
     }
 }
 

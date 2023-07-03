@@ -90,6 +90,9 @@ pub enum Instruction {
     SaveRegistersToMem {
         max_reg_num: u8,
     },
+    BCDRegister {
+        register_num: u8,
+    },
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq, Error)]
@@ -223,6 +226,7 @@ impl TryFrom<u16> for Instruction {
                     0x55 => Ok(Instruction::SaveRegistersToMem {
                         max_reg_num: register_num,
                     }),
+                    0x33 => Ok(Instruction::BCDRegister { register_num }),
                     _ => Err(InstructionDecodeError::UnknownInstruction(opcode)),
                 }
             }
