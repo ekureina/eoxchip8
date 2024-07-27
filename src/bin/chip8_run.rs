@@ -6,8 +6,8 @@ use std::{
 };
 
 use clap::Parser;
+use eoxchip8::core::cpu::main::Executor;
 use log::error;
-use rc8::core::cpu::main::Executor;
 
 #[derive(Debug, Parser, PartialEq, Eq, PartialOrd, Ord)]
 #[command(author, version, about)]
