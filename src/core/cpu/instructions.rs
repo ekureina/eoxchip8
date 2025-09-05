@@ -48,6 +48,12 @@ pub enum Instruction {
         x_reg_num: u8,
         y_reg_num: u8,
     },
+    SkipIfKeyPressed {
+        key_value: u8,
+    },
+    SkipIfKeyNotPressed {
+        key_value: u8,
+    },
     SetEqual {
         x_reg_num: u8,
         y_reg_num: u8,
@@ -219,6 +225,14 @@ impl TryFrom<u16> for Instruction {
                     y_reg_num,
                     sprite_length,
                 })
+            }
+            0xE000 => {
+                let (key_value, specifier) = separate_register_and_imm(opcode);
+                match specifier {
+                    0x9E => Ok(Instruction::SkipIfKeyPressed { key_value }),
+                    0xA1 => Ok(Instruction::SkipIfKeyNotPressed { key_value }),
+                    _ => Err(InstructionDecodeError::UnknownInstruction(opcode)),
+                }
             }
             0xF000 => {
                 let (register_num, specifier) = separate_register_and_imm(opcode);

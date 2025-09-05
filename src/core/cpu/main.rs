@@ -10,14 +10,18 @@ use super::{
     registers::{RegisterI, RegisterPC, RegisterV},
 };
 
+const GP_REGISTER_COUNT: usize = 16;
+const KEY_COUNT: usize = 16;
+
 #[derive(Default, Debug, Clone, PartialEq, PartialOrd, Ord, Eq)]
 pub struct Executor {
     memory: Ram,
-    gp_registers: [RegisterV; 16],
+    gp_registers: [RegisterV; GP_REGISTER_COUNT],
     display: Chip8Display,
     i: RegisterI,
     pc: RegisterPC,
     stack: Vec<Address>,
+    key_state: [bool; KEY_COUNT],
     legacy_shift: bool,
 }
 
@@ -34,8 +38,9 @@ impl Executor {
         self.memory.load_program(program)?;
         self.pc = RegisterPC::default();
         self.display = Chip8Display::default();
-        self.gp_registers = [RegisterV::default(); 16];
+        self.gp_registers = [RegisterV::default(); GP_REGISTER_COUNT];
         self.i = RegisterI::default();
+        self.key_state = [false; KEY_COUNT];
         Ok(())
     }
 
@@ -99,6 +104,16 @@ impl Executor {
                 if self.gp_registers[x_reg_num as usize].get()
                     != self.gp_registers[y_reg_num as usize].get()
                 {
+                    self.pc.inc();
+                }
+            }
+            Instruction::SkipIfKeyPressed { key_value } => {
+                if self.key_state[key_value as usize] {
+                    self.pc.inc();
+                }
+            }
+            Instruction::SkipIfKeyNotPressed { key_value } => {
+                if !self.key_state[key_value as usize] {
                     self.pc.inc();
                 }
             }
@@ -288,6 +303,14 @@ impl Executor {
         } else {
             self.gp_registers[15].set(0);
         }
+    }
+
+    pub fn set_key_pressed(&mut self, key_num: u8) {
+        self.key_state[key_num as usize] = true;
+    }
+
+    pub fn set_key_released(&mut self, key_num: u8) {
+        self.key_state[key_num as usize] = false;
     }
 }
 
