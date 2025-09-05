@@ -2,7 +2,7 @@ use log::debug;
 use thiserror::Error;
 
 use crate::core::memory::{
-    memory_to_flip_instructions, Address, Chip8Display, MemoryAccessError, Ram,
+    Address, Chip8Display, MemoryAccessError, Ram, memory_to_flip_instructions,
 };
 
 use super::{
@@ -45,7 +45,6 @@ impl Executor {
     }
 
     #[allow(clippy::too_many_lines)]
-    #[must_use]
     pub fn execute_once(&mut self) -> Result<(), ExecutionError> {
         let pc = self.pc.get();
         debug!("PC: {:?}", self.pc);

@@ -6,9 +6,9 @@ use std::time::{Duration, Instant};
 
 use clap::Parser;
 use eoxchip8::core::cpu::main::Executor;
-use iced::keyboard::{on_key_press, on_key_release, Key};
-use iced::{time, Font, Length};
+use iced::keyboard::{Key, on_key_press, on_key_release};
 use iced::{Element, Task, Theme};
+use iced::{Font, Length, time};
 use log::{error, info};
 
 pub fn main() -> iced::Result {
@@ -78,19 +78,15 @@ impl EoxChip8GUI {
                 }
             }
             EoxMessage::KeyUp(key) => {
-                if let Err(error) = self
-                    .executor
-                    .borrow_mut()
-                    .set_key_released(convert_key(key).unwrap())
+                if let Some(key_num) = convert_key(key)
+                    && let Err(error) = self.executor.borrow_mut().set_key_released(key_num)
                 {
                     error!("{error}");
                 }
             }
             EoxMessage::KeyDown(key) => {
-                if let Err(error) = self
-                    .executor
-                    .borrow_mut()
-                    .set_key_pressed(convert_key(key).unwrap())
+                if let Some(key_num) = convert_key(key)
+                    && let Err(error) = self.executor.borrow_mut().set_key_pressed(key_num)
                 {
                     error!("{error}");
                 }

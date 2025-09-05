@@ -1,9 +1,8 @@
 [package]
 name = "eoxchip8"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 authors = ["Claire Moore <kurennon@gmail.com>"]
-rust-version = "1.70"
 description = "A Chip8 emulator, written in rust"
 license = "Apache-2.0"
 publish = false
