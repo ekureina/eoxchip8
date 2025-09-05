@@ -6,6 +6,7 @@ use std::time::{Duration, Instant};
 
 use clap::Parser;
 use eoxchip8::core::cpu::main::Executor;
+use iced::keyboard::{on_key_press, on_key_release, Key};
 use iced::{time, Font, Length};
 use iced::{Element, Task, Theme};
 use log::{error, info};
@@ -43,6 +44,8 @@ struct EoxChip8GUI {
 #[derive(Debug, Clone)]
 enum EoxMessage {
     Tick(Instant),
+    KeyUp(Key),
+    KeyDown(Key),
 }
 
 impl EoxChip8GUI {
@@ -74,6 +77,24 @@ impl EoxChip8GUI {
                     error!("{error}");
                 }
             }
+            EoxMessage::KeyUp(key) => {
+                if let Err(error) = self
+                    .executor
+                    .borrow_mut()
+                    .set_key_released(convert_key(key).unwrap())
+                {
+                    error!("{error}");
+                }
+            }
+            EoxMessage::KeyDown(key) => {
+                if let Err(error) = self
+                    .executor
+                    .borrow_mut()
+                    .set_key_pressed(convert_key(key).unwrap())
+                {
+                    error!("{error}");
+                }
+            }
         }
         Task::none()
     }
@@ -92,10 +113,18 @@ impl EoxChip8GUI {
     }
 
     fn subscription(&self) -> iced::Subscription<EoxMessage> {
-        time::every(self.cycle_time).map(EoxMessage::Tick)
+        iced::Subscription::batch([
+            time::every(self.cycle_time).map(EoxMessage::Tick),
+            on_key_press(|key, _| Some(EoxMessage::KeyDown(key))),
+            on_key_release(|key, _| Some(EoxMessage::KeyUp(key))),
+        ])
     }
 
     fn theme(&self) -> Theme {
         Theme::Dark
     }
+}
+
+fn convert_key(_key: Key) -> Option<u8> {
+    Some(0)
 }

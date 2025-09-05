@@ -45,6 +45,7 @@ impl Executor {
     }
 
     #[allow(clippy::too_many_lines)]
+    #[must_use]
     pub fn execute_once(&mut self) -> Result<(), ExecutionError> {
         let pc = self.pc.get();
         debug!("PC: {:?}", self.pc);
@@ -305,13 +306,27 @@ impl Executor {
         }
     }
 
-    pub fn set_key_pressed(&mut self, key_num: u8) {
+    pub fn set_key_pressed(&mut self, key_num: u8) -> Result<(), KeyError> {
+        if key_num as usize >= KEY_COUNT {
+            return Err(KeyError::InvalidKey(key_num));
+        }
         self.key_state[key_num as usize] = true;
+        Ok(())
     }
 
-    pub fn set_key_released(&mut self, key_num: u8) {
+    pub fn set_key_released(&mut self, key_num: u8) -> Result<(), KeyError> {
+        if key_num as usize >= KEY_COUNT {
+            return Err(KeyError::InvalidKey(key_num));
+        }
         self.key_state[key_num as usize] = false;
+        Ok(())
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Error)]
+pub enum KeyError {
+    #[error("Invalid Key: {0}")]
+    InvalidKey(u8),
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq, Error)]
