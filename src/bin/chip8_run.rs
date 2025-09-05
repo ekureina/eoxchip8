@@ -6,19 +6,20 @@ use std::time::{Duration, Instant};
 
 use clap::Parser;
 use eoxchip8::core::cpu::main::Executor;
-use iced::widget::Text;
-use iced::{executor, time, Font, Length};
-use iced::{Application, Command, Element, Settings, Theme};
+use iced::{time, Font, Length};
+use iced::{Element, Task, Theme};
 use log::{error, info};
 
 pub fn main() -> iced::Result {
     env_logger::init();
 
     let args = Chip8RunArgs::parse();
-    let mut settings = Settings::with_flags(args);
-    settings.default_font = Font::MONOSPACE;
 
-    EoxChip8GUI::run(settings)
+    iced::application("EoxChip8", EoxChip8GUI::update, EoxChip8GUI::view)
+        .subscription(EoxChip8GUI::subscription)
+        .theme(EoxChip8GUI::theme)
+        .default_font(Font::MONOSPACE)
+        .run_with(|| EoxChip8GUI::new(args))
 }
 
 #[derive(Debug, Parser, PartialEq, Eq, PartialOrd, Ord)]
@@ -44,13 +45,8 @@ enum EoxMessage {
     Tick(Instant),
 }
 
-impl Application for EoxChip8GUI {
-    type Executor = executor::Default;
-    type Flags = Chip8RunArgs;
-    type Message = EoxMessage;
-    type Theme = Theme;
-
-    fn new(flags: Self::Flags) -> (Self, Command<Self::Message>) {
+impl EoxChip8GUI {
+    fn new(flags: Chip8RunArgs) -> (Self, Task<EoxMessage>) {
         let mut rom = File::open(flags.program_path).unwrap();
         let mut program = vec![];
         rom.read_to_end(&mut program).unwrap();
@@ -65,15 +61,11 @@ impl Application for EoxChip8GUI {
                 executor: RefCell::new(executor),
                 cycle_time,
             },
-            Command::none(),
+            Task::none(),
         )
     }
 
-    fn title(&self) -> String {
-        String::from("ExoChip8")
-    }
-
-    fn update(&mut self, message: Self::Message) -> Command<Self::Message> {
+    fn update(&mut self, message: EoxMessage) -> Task<EoxMessage> {
         match message {
             EoxMessage::Tick(instant) => {
                 info!("{instant:?}");
@@ -83,27 +75,27 @@ impl Application for EoxChip8GUI {
                 }
             }
         }
-        Command::none()
+        Task::none()
     }
 
-    fn view(&self) -> Element<'_, Self::Message> {
+    fn view(&self) -> Element<'_, EoxMessage> {
         let mut executor = self.executor.borrow_mut();
         let display = executor.get_display_mut();
         let display_text = format!("{}", display);
         display.render();
-        Text::new(display_text)
+        iced::widget::text(display_text)
             .width(Length::Fill)
-            .horizontal_alignment(iced::alignment::Horizontal::Center)
-            .vertical_alignment(iced::alignment::Vertical::Center)
+            .align_x(iced::alignment::Horizontal::Center)
+            .align_y(iced::alignment::Vertical::Center)
             .height(Length::Fill)
             .into()
     }
 
-    fn subscription(&self) -> iced::Subscription<Self::Message> {
+    fn subscription(&self) -> iced::Subscription<EoxMessage> {
         time::every(self.cycle_time).map(EoxMessage::Tick)
     }
 
-    fn theme(&self) -> Self::Theme {
+    fn theme(&self) -> Theme {
         Theme::Dark
     }
 }
