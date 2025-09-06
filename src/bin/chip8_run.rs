@@ -57,7 +57,9 @@ impl EoxChip8GUI {
         let mut program = vec![];
         rom.read_to_end(&mut program).unwrap();
 
-        let mut executor = Executor::new(flags.legacy_shift);
+        let timer_decrement_opcodes = flags.opcodes_per_second / 60;
+
+        let mut executor = Executor::new(flags.legacy_shift, timer_decrement_opcodes);
         executor.load_program(&program).unwrap();
 
         let cycle_time = Duration::from_secs(1) / flags.opcodes_per_second;

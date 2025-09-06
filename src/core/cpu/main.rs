@@ -23,13 +23,22 @@ pub struct Executor {
     stack: Vec<Address>,
     key_state: [bool; KEY_COUNT],
     legacy_shift: bool,
+    timer_decrement_opcodes: u32,
+    delay_timer_opcodes_to_decrement: u32,
+    delay_timer_value: u8,
 }
 
 impl Executor {
     #[must_use]
-    pub fn new(legacy_shift: bool) -> Self {
+    /// Create a new Chip8 `Executor`
+    ///
+    /// Set whether or not to use legacy shifting mechanics
+    /// Also, set the number of opcodes before the timer is decremented by one.
+    /// This should be set to happen at 60Hz
+    pub fn new(legacy_shift: bool, timer_decrement_opcodes: u32) -> Self {
         Executor {
             legacy_shift,
+            timer_decrement_opcodes,
             ..Default::default()
         }
     }
@@ -51,6 +60,7 @@ impl Executor {
         self.pc.inc();
         let instruction = self.memory.get_wide(pc)?.try_into()?;
         debug!("Instruction: {instruction:?}");
+        self.decrement_timers();
         match instruction {
             Instruction::ClearScreen => self.display.clear(),
             Instruction::Return => {
@@ -244,6 +254,17 @@ impl Executor {
             Instruction::Sys { .. } => {}
         }
         Ok(())
+    }
+
+    fn decrement_timers(&mut self) {
+        if self.delay_timer_value > 0 {
+            if self.delay_timer_opcodes_to_decrement == 0 {
+                self.delay_timer_value -= 1;
+                self.delay_timer_opcodes_to_decrement = self.timer_decrement_opcodes;
+            } else {
+                self.delay_timer_opcodes_to_decrement -= 1;
+            }
+        }
     }
 
     #[must_use]
