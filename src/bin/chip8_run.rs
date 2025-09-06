@@ -126,7 +126,11 @@ impl EoxChip8GUI {
                         ..
                     } => {
                         info!("Pressed {text:?}");
-                        Some(EoxMessage::KeyDown(key, physical_key))
+                        if let Some(_) = convert_key(physical_key) {
+                            Some(EoxMessage::KeyDown(key, physical_key))
+                        } else {
+                            None
+                        }
                     }
                     Event::KeyReleased { key, .. } => Some(EoxMessage::KeyUp(key)),
                     _ => None,
