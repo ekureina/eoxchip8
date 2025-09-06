@@ -102,6 +102,12 @@ pub enum Instruction {
     AddIV {
         register_num: u8,
     },
+    SetDelayTimer {
+        register_num: u8,
+    },
+    GetDelayTimer {
+        register_num: u8,
+    },
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq, Error)]
@@ -237,6 +243,8 @@ impl TryFrom<u16> for Instruction {
             0xF000 => {
                 let (register_num, specifier) = separate_register_and_imm(opcode);
                 match specifier {
+                    0x07 => Ok(Instruction::GetDelayTimer { register_num }),
+                    0x15 => Ok(Instruction::SetDelayTimer { register_num }),
                     0x65 => Ok(Instruction::LoadRegistersFromMem {
                         max_reg_num: register_num,
                     }),

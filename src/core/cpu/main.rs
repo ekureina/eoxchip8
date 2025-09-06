@@ -251,6 +251,13 @@ impl Executor {
             Instruction::AddIV { register_num } => {
                 self.i.add(self.gp_registers[register_num as usize].get());
             }
+            Instruction::GetDelayTimer { register_num } => {
+                self.gp_registers[register_num as usize].set(self.delay_timer_value);
+            }
+            Instruction::SetDelayTimer { register_num } => {
+                self.delay_timer_value = self.gp_registers[register_num as usize].get();
+                self.delay_timer_opcodes_to_decrement = self.timer_decrement_opcodes;
+            }
             Instruction::Sys { .. } => {}
         }
         Ok(())
@@ -258,11 +265,12 @@ impl Executor {
 
     fn decrement_timers(&mut self) {
         if self.delay_timer_value > 0 {
-            if self.delay_timer_opcodes_to_decrement == 0 {
+            self.delay_timer_opcodes_to_decrement -= 1;
+            if self.delay_timer_opcodes_to_decrement <= 0 {
                 self.delay_timer_value -= 1;
-                self.delay_timer_opcodes_to_decrement = self.timer_decrement_opcodes;
-            } else {
-                self.delay_timer_opcodes_to_decrement -= 1;
+                if self.delay_timer_value > 0 {
+                    self.delay_timer_opcodes_to_decrement = self.timer_decrement_opcodes;
+                }
             }
         }
     }
