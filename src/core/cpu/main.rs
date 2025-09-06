@@ -309,6 +309,7 @@ impl Executor {
         if key_num as usize >= KEY_COUNT {
             return Err(KeyError::InvalidKey(key_num));
         }
+        debug!("Key pressed: {key_num}");
         self.key_state[key_num as usize] = true;
         Ok(())
     }
@@ -317,6 +318,7 @@ impl Executor {
         if key_num as usize >= KEY_COUNT {
             return Err(KeyError::InvalidKey(key_num));
         }
+        debug!("Key released: {key_num}");
         self.key_state[key_num as usize] = false;
         Ok(())
     }

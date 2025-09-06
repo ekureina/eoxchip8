@@ -1,4 +1,5 @@
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
@@ -6,8 +7,9 @@ use std::time::{Duration, Instant};
 
 use clap::Parser;
 use eoxchip8::core::cpu::main::Executor;
-use iced::keyboard::{Key, on_key_press, on_key_release};
-use iced::{Element, Task, Theme};
+use iced::keyboard::key::{Code, Physical};
+use iced::keyboard::{Event, Key};
+use iced::{Element, Task, Theme, event};
 use iced::{Font, Length, time};
 use log::{error, info};
 
@@ -35,17 +37,18 @@ struct Chip8RunArgs {
     opcodes_per_second: u32,
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq)]
 struct EoxChip8GUI {
     executor: RefCell<Executor>,
     cycle_time: Duration,
+    key_map: HashMap<Key, Physical>,
 }
 
 #[derive(Debug, Clone)]
 enum EoxMessage {
     Tick(Instant),
+    KeyDown(Key, Physical),
     KeyUp(Key),
-    KeyDown(Key),
 }
 
 impl EoxChip8GUI {
@@ -63,6 +66,7 @@ impl EoxChip8GUI {
             EoxChip8GUI {
                 executor: RefCell::new(executor),
                 cycle_time,
+                key_map: HashMap::new(),
             },
             Task::none(),
         )
@@ -78,14 +82,16 @@ impl EoxChip8GUI {
                 }
             }
             EoxMessage::KeyUp(key) => {
-                if let Some(key_num) = convert_key(key)
+                if let Some(physical_key) = self.key_map.get(&key)
+                    && let Some(key_num) = convert_key(*physical_key)
                     && let Err(error) = self.executor.borrow_mut().set_key_released(key_num)
                 {
                     error!("{error}");
                 }
             }
-            EoxMessage::KeyDown(key) => {
-                if let Some(key_num) = convert_key(key)
+            EoxMessage::KeyDown(key, physical) => {
+                self.key_map.insert(key, physical);
+                if let Some(key_num) = convert_key(physical)
                     && let Err(error) = self.executor.borrow_mut().set_key_pressed(key_num)
                 {
                     error!("{error}");
@@ -111,8 +117,22 @@ impl EoxChip8GUI {
     fn subscription(&self) -> iced::Subscription<EoxMessage> {
         iced::Subscription::batch([
             time::every(self.cycle_time).map(EoxMessage::Tick),
-            on_key_press(|key, _| Some(EoxMessage::KeyDown(key))),
-            on_key_release(|key, _| Some(EoxMessage::KeyUp(key))),
+            event::listen_with(|event, _, _| match event {
+                iced::Event::Keyboard(event) => match event {
+                    Event::KeyPressed {
+                        key,
+                        physical_key,
+                        text,
+                        ..
+                    } => {
+                        info!("Pressed {text:?}");
+                        Some(EoxMessage::KeyDown(key, physical_key))
+                    }
+                    Event::KeyReleased { key, .. } => Some(EoxMessage::KeyUp(key)),
+                    _ => None,
+                },
+                _ => None,
+            }),
         ])
     }
 
@@ -121,6 +141,24 @@ impl EoxChip8GUI {
     }
 }
 
-fn convert_key(_key: Key) -> Option<u8> {
-    Some(0)
+fn convert_key(key: Physical) -> Option<u8> {
+    match key {
+        Physical::Code(Code::Digit1) => Some(1),
+        Physical::Code(Code::Digit2) => Some(2),
+        Physical::Code(Code::Digit3) => Some(3),
+        Physical::Code(Code::Digit4) => Some(12),
+        Physical::Code(Code::KeyQ) => Some(4),
+        Physical::Code(Code::KeyW) => Some(5),
+        Physical::Code(Code::KeyE) => Some(6),
+        Physical::Code(Code::KeyR) => Some(13),
+        Physical::Code(Code::KeyA) => Some(7),
+        Physical::Code(Code::KeyS) => Some(8),
+        Physical::Code(Code::KeyD) => Some(9),
+        Physical::Code(Code::KeyF) => Some(14),
+        Physical::Code(Code::KeyZ) => Some(10),
+        Physical::Code(Code::KeyX) => Some(0),
+        Physical::Code(Code::KeyC) => Some(11),
+        Physical::Code(Code::KeyV) => Some(15),
+        _ => None,
+    }
 }
